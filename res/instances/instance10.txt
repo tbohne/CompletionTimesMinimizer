@@ -1,0 +1,21 @@
+#number jobs
+10
+
+#processing times
+1 1
+2 3
+3 4
+4 7
+5 10
+6 5
+7 7
+8 9
+9 5
+10 1
+
+#precedence constraints
+1 7
+2 3
+3 7
+8 10
+9 10
