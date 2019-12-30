@@ -7,5 +7,8 @@ public class Test {
         Instance instance = InstanceReader.readInstance(instanceName);
         System.out.println(instance);
 
+        MIPFormulation mip = new MIPFormulation(instance, 180.0, true, 1, 0.0);
+        mip.solve();
+
     }
 }

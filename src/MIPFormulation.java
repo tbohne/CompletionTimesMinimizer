@@ -1,117 +1,156 @@
-//import ilog.concert.*;
-//import ilog.cplex.IloCplex;
-//
-//public class MIPFormulation {
-//
-//    private final double timeLimit;
-//    private final boolean hideCPLEXOutput;
-//    private final int mipEmphasis;
-//    private final double tolerance;
-//
-//    /**
-//     * Constructor
-//     *
-//     * @param instance        - instance to be solved
-//     * @param timeLimit       - time limit for the solving procedure
-//     * @param hideCPLEXOutput - determines whether the CPLEX output gets hidden
-//     * @param mipEmphasis     - controls trade-offs between speed, feasibility and optimality
-//     * @param tolerance       - termination tolerance
-//     */
-//    public MIPFormulation(Instance instance, double timeLimit, boolean hideCPLEXOutput, int mipEmphasis, double tolerance) {
-//        this.instance = instance;
-//        this.timeLimit = timeLimit;
-//        this.hideCPLEXOutput = hideCPLEXOutput;
-//        this.mipEmphasis = mipEmphasis;
-//        this.tolerance = tolerance;
-//    }
-//
-//    public Solution solve() {
-//
-//        Solution sol = new Solution(instance);
-//
-//        try {
-//            // define new model
-//            IloCplex cplex = new IloCplex();
-//
-//            IloIntVar[][] x = new IloIntVar[this.instance.getNumOfMachines()][];
-//            this.initVariables(cplex, x);
-//
-//            IloIntVar cMax = cplex.intVar(0, Integer.MAX_VALUE);
-//            cplex.addMinimize(cMax);
-//
-//            this.addConstraints(cplex, x, cMax);
-//
-//            this.setCPLEXConfig(cplex);
-//            double startTime = cplex.getCplexTime();
-//
-//            if (cplex.solve()) {
+import ilog.concert.*;
+import ilog.cplex.IloCplex;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class MIPFormulation {
+
+    private Instance instance;
+    private final double timeLimit;
+    private final boolean hideCPLEXOutput;
+    private final int mipEmphasis;
+    private final double tolerance;
+
+    /**
+     * Constructor
+     *
+     * @param instance        - instance to be solved
+     * @param timeLimit       - time limit for the solving procedure
+     * @param hideCPLEXOutput - determines whether the CPLEX output gets hidden
+     * @param mipEmphasis     - controls trade-offs between speed, feasibility and optimality
+     * @param tolerance       - termination tolerance
+     */
+    public MIPFormulation(Instance instance, double timeLimit, boolean hideCPLEXOutput, int mipEmphasis, double tolerance) {
+        this.instance = instance;
+        this.timeLimit = timeLimit;
+        this.hideCPLEXOutput = hideCPLEXOutput;
+        this.mipEmphasis = mipEmphasis;
+        this.tolerance = tolerance;
+    }
+
+    public int computeTimeHorizon() {
+        int sum = 0;
+        for (int processingTime : this.instance.getProcessingTimes()) {
+            sum += processingTime;
+        }
+        return sum;
+    }
+
+    public void solve() {
+
+        try {
+            // define new model
+            IloCplex cplex = new IloCplex();
+
+            int T = this.computeTimeHorizon();
+
+            IloIntVar[][] x = new IloIntVar[this.instance.getNumberOfJobs()][];
+            this.initVariables(cplex, x, T);
+
+            IloLinearNumExpr objective = cplex.linearNumExpr();
+
+            for (int j = 0; j < this.instance.getNumberOfJobs(); j++) {
+                for (int t = 0; t < T; t++) {
+                    objective.addTerm(t, x[j][t]);
+                }
+            }
+            cplex.addMinimize(objective);
+
+            this.addConstraints(cplex, x, T);
+
+            this.setCPLEXConfig(cplex);
+            double startTime = cplex.getCplexTime();
+
+            if (cplex.solve()) {
 //                this.generateSolutionFromVariableAssignments(sol, x, cplex);
 //                sol.setTimeToSolve(cplex.getCplexTime() - startTime);
-//            }
-//            cplex.end();
-//
-//        } catch (IloException e) {
-//            e.printStackTrace();
-//        }
+                List<Job> plannedJobs = this.generateSolutionFromVariableAssignments(x, cplex);
+                Solution sol = new Solution(plannedJobs);
+                System.out.println("sol: " + sol.getSumOfCompletionTimes());
+                System.out.println(sol);
+            }
+            cplex.end();
+
+        } catch (IloException e) {
+            e.printStackTrace();
+        }
 //        return sol;
-//    }
-//
-//    private void generateSolutionFromVariableAssignments(Solution sol, IloIntVar[][] x, IloCplex cplex) throws ilog.concert.IloException {
-//        List<Machine> machines = new ArrayList<>();
-//        for (int i = 0; i < this.instance.getNumOfMachines(); i++) {
-//            machines.add(new Machine(i));
-//        }
-//        for (int i = 0; i < x.length; i++) {
-//            for (int q = 0; q < x[0].length; q++) {
-//                if (Math.round(cplex.getValue(x[i][q])) == 1) {
-//                    machines.get(i).setJob(this.instance.getProcessingTimes().get(q));
-//                }
-//            }
-//        }
-//        sol.setMachineAllocations(machines);
-//    }
-//
-//    private void initVariables(IloCplex cplex, IloIntVar[][] x) throws ilog.concert.IloException {
-//        for (int i = 0; i < this.instance.getNumOfMachines(); i++) {
-//            x[i] = cplex.intVarArray(this.instance.getNumOfJobs(), 0, 1);
-//        }
-//    }
-//
-//    private void addConstraints(IloCplex cplex, IloIntVar[][] x, IloIntVar cMax ) throws ilog.concert.IloException {
-//
-//        // --- Constraint (1) ---
-//        for (int j = 0; j < this.instance.getNumOfJobs(); j++) {
-//            IloLinearIntExpr expr = cplex.linearIntExpr();
-//            for (int i = 0; i < this.instance.getNumOfMachines(); i++) {
-//                expr.addTerm(1, x[i][j]);
-//            }
-//            cplex.addEq(expr, 1);
-//        }
-//
-//        // --- Constraint (2) ---
-//        for (int i = 0; i < this.instance.getNumOfMachines(); i++) {
-//            IloLinearIntExpr expr = cplex.linearIntExpr();
-//            for (int j = 0; j < this.instance.getNumOfJobs(); j++) {
-//                expr.addTerm(this.instance.getProcessingTimes().get(j), x[i][j]);
-//            }
-//            cplex.addGe(cplex.diff(cMax, expr), 0);
-//        }
-//    }
-//
-//    private void setCPLEXConfig(IloCplex cplex) throws ilog.concert.IloException {
-//
-//        if (this.hideCPLEXOutput) {
-//            cplex.setOut(null);
-//        }
-//
-//        // set time limit
-//        cplex.setParam(IloCplex.Param.TimeLimit, this.timeLimit);
-//
-//        // control trade-offs between speed, feasibility and optimality
-//        cplex.setParam(IloCplex.IntParam.MIPEmphasis, this.mipEmphasis);
-//
-//        // set termination tolerance
-//        cplex.setParam(IloCplex.DoubleParam.EpAGap, this.tolerance);
-//        cplex.setParam(IloCplex.DoubleParam.EpGap, this.tolerance);
-//    }
-//}
+    }
+
+    private List<Job> generateSolutionFromVariableAssignments(IloIntVar[][] x, IloCplex cplex) throws ilog.concert.IloException {
+        List<Job> plannedJobs = new ArrayList<>();
+        for (int j = 0; j < x.length; j++) {
+            for (int t = 0; t < x[0].length; t++) {
+                if (Math.round(cplex.getValue(x[j][t])) == 1) {
+                    plannedJobs.add(new Job(j + 1, t + 1));
+//                    System.out.println("job " + (j + 1) + " ends at time " + (t + 1));
+                }
+            }
+        }
+        return plannedJobs;
+    }
+
+    private void initVariables(IloCplex cplex, IloIntVar[][] x, int T) throws ilog.concert.IloException {
+        for (int j = 0; j < this.instance.getNumberOfJobs(); j++) {
+            x[j] = cplex.intVarArray(T, 0, 1);
+        }
+    }
+
+    private void addConstraints(IloCplex cplex, IloIntVar[][] x, int T) throws ilog.concert.IloException {
+
+        // j starting at job 0, t starting at t = 1
+
+        // --- Constraint (3.11) ---
+        for (int j = 0; j < this.instance.getNumberOfJobs(); j++) {
+            IloLinearIntExpr expr = cplex.linearIntExpr();
+            for (int t = this.instance.getProcessingTimes()[j] - 1; t < T; t++) {
+                expr.addTerm(1, x[j][t]);
+            }
+            cplex.addEq(expr, 1);
+        }
+
+        // --- Constraint (3.12) ---
+        for (int t = 0; t < T; t++) {
+            IloLinearIntExpr expr = cplex.linearIntExpr();
+            for (int j = 0; j < this.instance.getNumberOfJobs(); j++) {
+                for (int tau = t; tau <= Math.min(t + this.instance.getProcessingTimes()[j] - 1, T - 1); tau++) {
+                    expr.addTerm(1, x[j][tau]);
+                }
+            }
+            cplex.addLe(expr, 1);
+        }
+
+        // --- Constraint (3.13) ---
+        for (Precedence prec : this.instance.getPrecedences()) {
+
+            IloLinearIntExpr exprOne = cplex.linearIntExpr();
+            IloLinearIntExpr exprTwo = cplex.linearIntExpr();
+
+            for (int t = 0; t < T; t++) {
+                exprOne.addTerm(t, x[prec.getSucc() - 1][t]);
+            }
+            for (int t = 0; t < T; t++) {
+                exprTwo.addTerm(t, x[prec.getPred() - 1][t]);
+            }
+            cplex.addGe(cplex.diff(exprOne, exprTwo), this.instance.getProcessingTimes()[prec.getSucc() - 1]);
+        }
+    }
+
+    private void setCPLEXConfig(IloCplex cplex) throws ilog.concert.IloException {
+
+        if (this.hideCPLEXOutput) {
+            cplex.setOut(null);
+        }
+
+        // set time limit
+        cplex.setParam(IloCplex.Param.TimeLimit, this.timeLimit);
+
+        // control trade-offs between speed, feasibility and optimality
+        cplex.setParam(IloCplex.IntParam.MIPEmphasis, this.mipEmphasis);
+
+        // set termination tolerance
+        cplex.setParam(IloCplex.DoubleParam.EpAGap, this.tolerance);
+        cplex.setParam(IloCplex.DoubleParam.EpGap, this.tolerance);
+    }
+}
