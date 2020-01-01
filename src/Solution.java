@@ -1,5 +1,3 @@
-import sun.plugin.dom.core.CoreConstants;
-
 import java.util.Collections;
 import java.util.List;
 

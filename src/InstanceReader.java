@@ -13,18 +13,15 @@ public class InstanceReader {
         List<Precedence> precedences = new ArrayList<>();
 
         try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
-
             reader.readLine();
             numberOfJobs = Integer.parseInt(reader.readLine().trim());
             reader.readLine();
             reader.readLine();
-
             processingTimes = new int[numberOfJobs];
             for (int idx = 0; idx < numberOfJobs; idx++) {
                 String line = reader.readLine().trim();
                 processingTimes[idx] = Integer.parseInt(line.split(" ")[1]);
             }
-
             String line = reader.readLine();
             line = reader.readLine();
             line = reader.readLine();
@@ -32,11 +29,9 @@ public class InstanceReader {
                 precedences.add(new Precedence(Integer.parseInt(line.split(" ")[0]),Integer.parseInt(line.split(" ")[1])));
                 line = reader.readLine();
             }
-
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         return new Instance(numberOfJobs, processingTimes, precedences);
     }
 }

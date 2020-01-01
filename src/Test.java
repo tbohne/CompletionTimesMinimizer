@@ -28,19 +28,19 @@ public class Test {
             System.out.println("time: " + sol.getTimeToSolve());
             SolutionWriter.writeSolutionAsCSV("solutions.csv", sol, TIME_LIMIT);
 
-            mip.solve(2, instanceName);
+            sol = mip.solve(2, instanceName);
             System.out.println("obj: " + sol.getSumOfCompletionTimes());
             System.out.println(sol);
             System.out.println("time: " + sol.getTimeToSolve());
             SolutionWriter.writeSolutionAsCSV("solutions.csv", sol, TIME_LIMIT);
 
-            mip.solve(3, instanceName);
+            sol = mip.solve(3, instanceName);
             System.out.println("obj: " + sol.getSumOfCompletionTimes());
             System.out.println(sol);
             System.out.println("time: " + sol.getTimeToSolve());
             SolutionWriter.writeSolutionAsCSV("solutions.csv", sol, TIME_LIMIT);
 
-            mip.solve(4, instanceName);
+            sol = mip.solve(4, instanceName);
             System.out.println("obj: " + sol.getSumOfCompletionTimes());
             System.out.println(sol);
             System.out.println("time: " + sol.getTimeToSolve());
