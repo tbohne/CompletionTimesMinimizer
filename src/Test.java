@@ -23,5 +23,10 @@ public class Test {
         System.out.println("obj: " + sol.getSumOfCompletionTimes());
         System.out.println(sol);
         System.out.println("time: " + sol.getTimeToSolve());
+
+        mip.solve(4);
+        System.out.println("obj: " + sol.getSumOfCompletionTimes());
+        System.out.println(sol);
+        System.out.println("time: " + sol.getTimeToSolve());
     }
 }
