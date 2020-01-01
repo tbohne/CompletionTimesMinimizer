@@ -144,7 +144,15 @@ public class MIPFormulation {
     }
 
     public void applyPrecVariantThree(IloCplex cplex, IloIntVar[][] x, int T) throws ilog.concert.IloException {
-
+        for (Precedence prec : this.instance.getPrecedences()) {
+            for (int t = 0; t < T; t++) {
+                IloLinearIntExpr expr = cplex.linearIntExpr();
+                for (int tau = t + this.instance.getProcessingTimes()[prec.getSucc() - 1]; tau < T; tau++) {
+                    expr.addTerm(1, x[prec.getSucc() - 1][tau]);
+                }
+                cplex.addLe(cplex.diff(x[prec.getPred() - 1][t], expr), 0);
+            }
+        }
     }
 
     public void applyPrecVariantTwo(IloCplex cplex, IloIntVar[][] x, int T) throws ilog.concert.IloException {
