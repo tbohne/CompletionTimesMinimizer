@@ -8,7 +8,8 @@ public class Test {
         System.out.println(instance);
 
         MIPFormulation mip = new MIPFormulation(instance, 180.0, true, 1, 0.0);
-        mip.solve();
+        mip.solve(1);
+        mip.solve(2);
 
     }
 }

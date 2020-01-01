@@ -37,7 +37,7 @@ public class MIPFormulation {
         return sum;
     }
 
-    public void solve() {
+    public void solve(int precModel) {
 
         try {
             // define new model
@@ -57,7 +57,7 @@ public class MIPFormulation {
             }
             cplex.addMinimize(objective);
 
-            this.addConstraints(cplex, x, T);
+            this.addConstraints(cplex, x, T, precModel);
 
             this.setCPLEXConfig(cplex);
             double startTime = cplex.getCplexTime();
@@ -97,7 +97,7 @@ public class MIPFormulation {
         }
     }
 
-    private void addConstraints(IloCplex cplex, IloIntVar[][] x, int T) throws ilog.concert.IloException {
+    private void addConstraints(IloCplex cplex, IloIntVar[][] x, int T, int precModel) throws ilog.concert.IloException {
 
         // j starting at job 0, t starting at t = 1
 
@@ -121,6 +121,46 @@ public class MIPFormulation {
             cplex.addLe(expr, 1);
         }
 
+        switch (precModel) {
+            case 1:
+                this.applyPrecVariantOne(cplex, x, T);
+                break;
+            case 2:
+                this.applyPrecVariantTwo(cplex, x, T);
+                break;
+            case 3:
+                this.applyPrecVariantThree(cplex, x, T);
+                break;
+            case 4:
+                this.applyPrecVariantFour(cplex, x, T);
+                break;
+            default:
+                System.out.println("unknown precedence model");
+                System.exit(0);
+        }
+    }
+
+    public void applyPrecVariantFour(IloCplex cplex, IloIntVar[][] x, int T) throws ilog.concert.IloException {
+
+    }
+
+    public void applyPrecVariantThree(IloCplex cplex, IloIntVar[][] x, int T) throws ilog.concert.IloException {
+
+    }
+
+    public void applyPrecVariantTwo(IloCplex cplex, IloIntVar[][] x, int T) throws ilog.concert.IloException {
+        for (Precedence prec : this.instance.getPrecedences()) {
+            for (int t = 0; t < T; t++) {
+                IloLinearIntExpr expr = cplex.linearIntExpr();
+                for (int tau = 0; tau < Math.min(t + this.instance.getProcessingTimes()[prec.getSucc() - 1] - 1, T); tau++) {
+                    expr.addTerm(1, x[prec.getSucc() - 1][tau]);
+                }
+                cplex.addLe(cplex.sum(x[prec.getPred() - 1][t], expr), 1);
+            }
+        }
+    }
+
+    public void applyPrecVariantOne(IloCplex cplex, IloIntVar[][] x, int T) throws ilog.concert.IloException {
         // --- Constraint (3.13) ---
         for (Precedence prec : this.instance.getPrecedences()) {
 
