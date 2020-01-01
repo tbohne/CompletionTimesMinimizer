@@ -4,10 +4,19 @@ import java.util.List;
 public class Solution {
 
     private List<Job> plannedJobs;
+    private double timeToSolve;
 
     public Solution(List<Job> plannedJobs) {
         this.plannedJobs = plannedJobs;
         Collections.sort(this.plannedJobs);
+    }
+
+    public void setTimeToSolve(double timeToSolve) {
+        this.timeToSolve = timeToSolve;
+    }
+
+    public String getTimeToSolve() {
+        return String.format("%.02f", this.timeToSolve).replace(",", ".");
     }
 
     public int getSumOfCompletionTimes() {

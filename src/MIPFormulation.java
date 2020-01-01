@@ -37,7 +37,9 @@ public class MIPFormulation {
         return sum;
     }
 
-    public void solve(int precModel) {
+    public Solution solve(int precModel) {
+
+        Solution sol = new Solution(new ArrayList<>());
 
         try {
             // define new model
@@ -63,19 +65,16 @@ public class MIPFormulation {
             double startTime = cplex.getCplexTime();
 
             if (cplex.solve()) {
-//                this.generateSolutionFromVariableAssignments(sol, x, cplex);
-//                sol.setTimeToSolve(cplex.getCplexTime() - startTime);
                 List<Job> plannedJobs = this.generateSolutionFromVariableAssignments(x, cplex);
-                Solution sol = new Solution(plannedJobs);
-                System.out.println("sol: " + sol.getSumOfCompletionTimes());
-                System.out.println(sol);
+                sol = new Solution(plannedJobs);
+                sol.setTimeToSolve(cplex.getCplexTime() - startTime);
             }
             cplex.end();
 
         } catch (IloException e) {
             e.printStackTrace();
         }
-//        return sol;
+        return sol;
     }
 
     private List<Job> generateSolutionFromVariableAssignments(IloIntVar[][] x, IloCplex cplex) throws ilog.concert.IloException {

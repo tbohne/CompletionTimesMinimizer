@@ -8,8 +8,15 @@ public class Test {
         System.out.println(instance);
 
         MIPFormulation mip = new MIPFormulation(instance, 180.0, true, 1, 0.0);
-        mip.solve(1);
-        mip.solve(2);
 
+        Solution sol = mip.solve(1);
+        System.out.println("obj: " + sol.getSumOfCompletionTimes());
+        System.out.println(sol);
+        System.out.println("time: " + sol.getTimeToSolve());
+
+        mip.solve(2);
+        System.out.println("obj: " + sol.getSumOfCompletionTimes());
+        System.out.println(sol);
+        System.out.println("time: " + sol.getTimeToSolve());
     }
 }
