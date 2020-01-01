@@ -1,32 +1,50 @@
+import java.io.File;
+import java.util.Arrays;
+
 public class Test {
+
+    private static final String INSTANCE_PREFIX = "res/instances/";
+    private static final int TIME_LIMIT = 600;
 
     public static void main(String[] args) {
 
-        String instanceName = "res/instances/instance10.txt";
-        System.out.println("working on: " + instanceName);
-        Instance instance = InstanceReader.readInstance(instanceName);
-        System.out.println(instance);
+        File dir = new File(INSTANCE_PREFIX);
+        File[] directoryListing = dir.listFiles();
+        assert directoryListing != null;
+        Arrays.sort(directoryListing);
 
-        MIPFormulation mip = new MIPFormulation(instance, 180.0, true, 1, 0.0);
+        for (File file : directoryListing) {
 
-        Solution sol = mip.solve(1);
-        System.out.println("obj: " + sol.getSumOfCompletionTimes());
-        System.out.println(sol);
-        System.out.println("time: " + sol.getTimeToSolve());
+            String instanceName = file.toString().replace(INSTANCE_PREFIX, "").replace(".txt", "");
+            System.out.println("working on: " + instanceName);
+            Instance instance = InstanceReader.readInstance(INSTANCE_PREFIX + instanceName + ".txt");
+            String solutionName = instanceName.replace("instance", "sol");
 
-        mip.solve(2);
-        System.out.println("obj: " + sol.getSumOfCompletionTimes());
-        System.out.println(sol);
-        System.out.println("time: " + sol.getTimeToSolve());
+            MIPFormulation mip = new MIPFormulation(instance, TIME_LIMIT, true, 1, 0.0);
 
-        mip.solve(3);
-        System.out.println("obj: " + sol.getSumOfCompletionTimes());
-        System.out.println(sol);
-        System.out.println("time: " + sol.getTimeToSolve());
+            Solution sol = mip.solve(1, instanceName);
+            System.out.println("obj: " + sol.getSumOfCompletionTimes());
+            System.out.println(sol);
+            System.out.println("time: " + sol.getTimeToSolve());
+            SolutionWriter.writeSolutionAsCSV("solutions.csv", sol, TIME_LIMIT);
 
-        mip.solve(4);
-        System.out.println("obj: " + sol.getSumOfCompletionTimes());
-        System.out.println(sol);
-        System.out.println("time: " + sol.getTimeToSolve());
+            mip.solve(2, instanceName);
+            System.out.println("obj: " + sol.getSumOfCompletionTimes());
+            System.out.println(sol);
+            System.out.println("time: " + sol.getTimeToSolve());
+            SolutionWriter.writeSolutionAsCSV("solutions.csv", sol, TIME_LIMIT);
+
+            mip.solve(3, instanceName);
+            System.out.println("obj: " + sol.getSumOfCompletionTimes());
+            System.out.println(sol);
+            System.out.println("time: " + sol.getTimeToSolve());
+            SolutionWriter.writeSolutionAsCSV("solutions.csv", sol, TIME_LIMIT);
+
+            mip.solve(4, instanceName);
+            System.out.println("obj: " + sol.getSumOfCompletionTimes());
+            System.out.println(sol);
+            System.out.println("time: " + sol.getTimeToSolve());
+            SolutionWriter.writeSolutionAsCSV("solutions.csv", sol, TIME_LIMIT);
+        }
     }
 }

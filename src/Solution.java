@@ -1,3 +1,5 @@
+import sun.plugin.dom.core.CoreConstants;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -5,10 +7,22 @@ public class Solution {
 
     private List<Job> plannedJobs;
     private double timeToSolve;
+    private int precModel;
+    private String nameOfSolvedInstance;
 
-    public Solution(List<Job> plannedJobs) {
+    public Solution(List<Job> plannedJobs, String nameOfSolvedInstance, int precModel) {
         this.plannedJobs = plannedJobs;
         Collections.sort(this.plannedJobs);
+        this.nameOfSolvedInstance = nameOfSolvedInstance;
+        this.precModel = precModel;
+    }
+
+    public String getNameOfSolvedInstance() {
+        return this.nameOfSolvedInstance;
+    }
+
+    public int getPrecModel() {
+        return this.precModel;
     }
 
     public void setTimeToSolve(double timeToSolve) {

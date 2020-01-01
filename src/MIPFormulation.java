@@ -37,9 +37,9 @@ public class MIPFormulation {
         return sum;
     }
 
-    public Solution solve(int precModel) {
+    public Solution solve(int precModel, String instanceName) {
 
-        Solution sol = new Solution(new ArrayList<>());
+        Solution sol = new Solution(new ArrayList<>(), instanceName, precModel);
 
         try {
             // define new model
@@ -66,7 +66,7 @@ public class MIPFormulation {
 
             if (cplex.solve()) {
                 List<Job> plannedJobs = this.generateSolutionFromVariableAssignments(x, cplex);
-                sol = new Solution(plannedJobs);
+                sol = new Solution(plannedJobs, instanceName, precModel);
                 sol.setTimeToSolve(cplex.getCplexTime() - startTime);
             }
             cplex.end();
