@@ -20,7 +20,7 @@ public class SolutionWriter {
             }
             if (sol.isFeasible()) {
                 bw.write(
-                    sol.getNameOfSolvedInstance() + "," + sol.getPrecModel() + "," + timeLimit + ","
+                    sol.getNameOfSolvedInstance() + ",m" + sol.getPrecModel() + "," + timeLimit + ","
                         + sol.getTimeToSolve() + "," + sol.getSumOfCompletionTimes() + "\n"
                 );
             }

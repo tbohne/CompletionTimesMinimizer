@@ -64,13 +64,15 @@ public class MIPFormulation {
             this.setCPLEXConfig(cplex);
             double startTime = cplex.getCplexTime();
 
-            cplex.exportModel("res/lp_files/" + instanceName + "_" + precModel + ".lp");
+            // TODO: solving another problem, I'm starting at idx 0 for jobs and times --> start at 1 when using SCIP
+//            cplex.exportModel("res/lp_files/" + instanceName + "_" + precModel + ".lp");
 
             if (cplex.solve()) {
                 List<Job> plannedJobs = this.generateSolutionFromVariableAssignments(x, cplex);
                 sol = new Solution(plannedJobs, instanceName, precModel);
                 sol.setTimeToSolve(cplex.getCplexTime() - startTime);
             }
+
             cplex.end();
 
         } catch (IloException e) {
