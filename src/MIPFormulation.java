@@ -64,6 +64,8 @@ public class MIPFormulation {
             this.setCPLEXConfig(cplex);
             double startTime = cplex.getCplexTime();
 
+            cplex.exportModel("res/lp_files/" + instanceName + "_" + precModel + ".lp");
+
             if (cplex.solve()) {
                 List<Job> plannedJobs = this.generateSolutionFromVariableAssignments(x, cplex);
                 sol = new Solution(plannedJobs, instanceName, precModel);
