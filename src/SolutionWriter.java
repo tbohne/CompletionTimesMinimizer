@@ -5,6 +5,13 @@ import java.io.IOException;
 
 public class SolutionWriter {
 
+    /**
+     * Writes a solution as CSV.
+     *
+     * @param filename  - filename for the csv file
+     * @param sol       - solution to be written to the file
+     * @param timeLimit - time limit that was used while generating the solution
+     */
     public static void writeSolutionAsCSV(String filename, Solution sol, double timeLimit) {
         try {
             File file = new File(filename);

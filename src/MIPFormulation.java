@@ -4,6 +4,9 @@ import ilog.cplex.IloCplex;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Represents a MIP formulation for 1 | prec | sum C_j.
+ */
 public class MIPFormulation {
 
     private Instance instance;
@@ -29,14 +32,26 @@ public class MIPFormulation {
         this.tolerance = tolerance;
     }
 
+    /**
+     * Computes the time horizon for the given instance.
+     *
+     * @return time horizon T
+     */
     public int computeTimeHorizon() {
-        int sum = 0;
+        int timeHorizon = 0;
         for (int processingTime : this.instance.getProcessingTimes()) {
-            sum += processingTime;
+            timeHorizon += processingTime;
         }
-        return sum;
+        return timeHorizon;
     }
 
+    /**
+     * Solves the instance of the scheduling problem using CPLEX.
+     *
+     * @param precModel    - precedence model to be used in the MIP formulation
+     * @param instanceName - name of the instance to be solved
+     * @return generated solution
+     */
     public Solution solve(int precModel, String instanceName) {
 
         Solution sol = new Solution(new ArrayList<>(), instanceName, precModel);
@@ -46,26 +61,18 @@ public class MIPFormulation {
             IloCplex cplex = new IloCplex();
 
             int T = this.computeTimeHorizon();
-
             IloIntVar[][] x = new IloIntVar[this.instance.getNumberOfJobs()][];
             this.initVariables(cplex, x, T);
-
             IloLinearNumExpr objective = cplex.linearNumExpr();
-
             for (int j = 0; j < this.instance.getNumberOfJobs(); j++) {
                 for (int t = 0; t < T; t++) {
                     objective.addTerm(t, x[j][t]);
                 }
             }
             cplex.addMinimize(objective);
-
             this.addConstraints(cplex, x, T, precModel);
-
             this.setCPLEXConfig(cplex);
             double startTime = cplex.getCplexTime();
-
-            // TODO: solving another problem, I'm starting at idx 0 for jobs and times --> start at 1 when using SCIP
-//            cplex.exportModel("res/lp_files/" + instanceName + "_" + precModel + ".lp");
 
             if (cplex.solve()) {
                 List<Job> plannedJobs = this.generateSolutionFromVariableAssignments(x, cplex);
@@ -81,25 +88,49 @@ public class MIPFormulation {
         return sol;
     }
 
+    /**
+     * Generates a solution from the CPLEX variable assignments.
+     *
+     * @param x     - decision variables set by CPLEX
+     * @param cplex - CPLEX model
+     * @return list of planned jobs
+     * @throws ilog.concert.IloException
+     */
     private List<Job> generateSolutionFromVariableAssignments(IloIntVar[][] x, IloCplex cplex) throws ilog.concert.IloException {
         List<Job> plannedJobs = new ArrayList<>();
         for (int j = 0; j < x.length; j++) {
             for (int t = 0; t < x[0].length; t++) {
                 if (Math.round(cplex.getValue(x[j][t])) == 1) {
                     plannedJobs.add(new Job(j + 1, t + 1));
-//                    System.out.println("job " + (j + 1) + " ends at time " + (t + 1));
                 }
             }
         }
         return plannedJobs;
     }
 
+    /**
+     * Initializes the decision variables.
+     *
+     * @param cplex - CPLEX model
+     * @param x     - decision variables
+     * @param T     - time horizon
+     * @throws ilog.concert.IloException
+     */
     private void initVariables(IloCplex cplex, IloIntVar[][] x, int T) throws ilog.concert.IloException {
         for (int j = 0; j < this.instance.getNumberOfJobs(); j++) {
             x[j] = cplex.intVarArray(T, 0, 1);
         }
     }
 
+    /**
+     * Adds the constraints of the MIP formulation to the CPLEX model.
+     *
+     * @param cplex     - CPLEX model
+     * @param x         - decision variables
+     * @param T         - time horizon
+     * @param precModel - precedence model to be used
+     * @throws ilog.concert.IloException
+     */
     private void addConstraints(IloCplex cplex, IloIntVar[][] x, int T, int precModel) throws ilog.concert.IloException {
 
         // j starting at job 0, t starting at t = 1
@@ -143,6 +174,14 @@ public class MIPFormulation {
         }
     }
 
+    /**
+     * Applies precedence variant 4.
+     *
+     * @param cplex - CPLEX model
+     * @param x     - decision variables
+     * @param T     - time horizon
+     * @throws ilog.concert.IloException
+     */
     public void applyPrecVariantFour(IloCplex cplex, IloIntVar[][] x, int T) throws ilog.concert.IloException {
         for (Precedence prec : this.instance.getPrecedences()) {
             for (int t = 0; t < T; t++) {
@@ -159,6 +198,14 @@ public class MIPFormulation {
         }
     }
 
+    /**
+     * Applies precedence variant 3.
+     *
+     * @param cplex - CPLEX model
+     * @param x     - decision variables
+     * @param T     - time horizon
+     * @throws ilog.concert.IloException
+     */
     public void applyPrecVariantThree(IloCplex cplex, IloIntVar[][] x, int T) throws ilog.concert.IloException {
         for (Precedence prec : this.instance.getPrecedences()) {
             for (int t = 0; t < T; t++) {
@@ -171,6 +218,14 @@ public class MIPFormulation {
         }
     }
 
+    /**
+     * Applies precedence variant 2.
+     *
+     * @param cplex - CPLEX model
+     * @param x     - decision variables
+     * @param T     - time horizon
+     * @throws ilog.concert.IloException
+     */
     public void applyPrecVariantTwo(IloCplex cplex, IloIntVar[][] x, int T) throws ilog.concert.IloException {
         for (Precedence prec : this.instance.getPrecedences()) {
             for (int t = 0; t < T; t++) {
@@ -183,6 +238,14 @@ public class MIPFormulation {
         }
     }
 
+    /**
+     * Applies precedence variant 1.
+     *
+     * @param cplex - CPLEX model
+     * @param x     - decision variables
+     * @param T     - time horizon
+     * @throws ilog.concert.IloException
+     */
     public void applyPrecVariantOne(IloCplex cplex, IloIntVar[][] x, int T) throws ilog.concert.IloException {
         // --- Constraint (3.13) ---
         for (Precedence prec : this.instance.getPrecedences()) {
@@ -200,6 +263,12 @@ public class MIPFormulation {
         }
     }
 
+    /**
+     * Sets the CPLEX configuration.
+     *
+     * @param cplex - CPLEX model to be configured
+     * @throws ilog.concert.IloException
+     */
     private void setCPLEXConfig(IloCplex cplex) throws ilog.concert.IloException {
 
         if (this.hideCPLEXOutput) {

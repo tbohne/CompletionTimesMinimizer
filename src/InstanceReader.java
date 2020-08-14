@@ -6,6 +6,12 @@ import java.util.List;
 
 public class InstanceReader {
 
+    /**
+     * Reads an instance of the scheduling problem from the specified file.
+     *
+     * @param filename - name of the file to be read
+     * @return read instance
+     */
     public static Instance readInstance(String filename) {
 
         int numberOfJobs = 0;
