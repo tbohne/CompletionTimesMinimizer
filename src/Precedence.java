@@ -3,8 +3,8 @@
  */
 public class Precedence {
 
-    private int pred;
-    private int succ;
+    private final int pred;
+    private final int succ;
 
     /**
      * Constructor

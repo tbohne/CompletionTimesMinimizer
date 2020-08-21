@@ -6,10 +6,10 @@ import java.util.List;
  */
 public class Solution {
 
-    private List<Job> plannedJobs;
+    private final List<Job> plannedJobs;
     private double timeToSolve;
-    private int precModel;
-    private String nameOfSolvedInstance;
+    private final int precModel;
+    private final String nameOfSolvedInstance;
 
     /**
      * Constructor
@@ -86,11 +86,11 @@ public class Solution {
 
     @Override
     public String toString() {
-        String str = "";
+        StringBuilder str = new StringBuilder();
         for (Job job : this.plannedJobs) {
-            str += job + " - ";
+            str.append(job).append(" - ");
         }
-        str += "\n";
-        return str;
+        str.append("\n");
+        return str.toString();
     }
 }

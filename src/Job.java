@@ -3,8 +3,8 @@
  */
 public class Job implements Comparable<Job> {
 
-    private int idx;
-    private int endTime;
+    private final int idx;
+    private final int endTime;
 
     /**
      * Constructor
@@ -37,17 +37,11 @@ public class Job implements Comparable<Job> {
 
     @Override
     public String toString() {
-        return Integer.toString(this.idx) + " (" + this.endTime + ")";
+        return this.idx + " (" + this.endTime + ")";
     }
 
     @Override
     public int compareTo(Job other) {
-        if (this.endTime < other.endTime) {
-            return -1;
-        } else if (this.endTime > other.endTime) {
-            return 1;
-        } else {
-            return 0;
-        }
+        return Integer.compare(this.endTime, other.endTime);
     }
 }

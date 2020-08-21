@@ -1,7 +1,7 @@
 library(ggplot2)
 library(plyr)
 
-input <- read.csv(file = "tim_results1.csv", header = TRUE, sep = ",")
+input <- read.csv(file = "res.csv", header = TRUE, sep = ",")
 numOfInstances <- 12
 
 print("########## THE ACTUAL RESULTS ############")

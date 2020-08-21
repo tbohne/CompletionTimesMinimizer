@@ -9,7 +9,7 @@ import java.util.List;
  */
 public class MIPFormulation {
 
-    private Instance instance;
+    private final Instance instance;
     private final double timeLimit;
     private final boolean hideCPLEXOutput;
     private final int mipEmphasis;
@@ -79,9 +79,7 @@ public class MIPFormulation {
                 sol = new Solution(plannedJobs, instanceName, precModel);
                 sol.setTimeToSolve(cplex.getCplexTime() - startTime);
             }
-
             cplex.end();
-
         } catch (IloException e) {
             e.printStackTrace();
         }

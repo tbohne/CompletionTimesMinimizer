@@ -5,9 +5,9 @@ import java.util.List;
  */
 public class Instance {
 
-    private int numberOfJobs;
-    private int[] processingTimes;
-    private List<Precedence> precedences;
+    private final int numberOfJobs;
+    private final int[] processingTimes;
+    private final List<Precedence> precedences;
 
     /**
      * Constructor
@@ -51,18 +51,18 @@ public class Instance {
 
     @Override
     public String toString() {
-        String str = "";
-        str += "number of jobs: " + this.numberOfJobs + "\n";
-        str += "processing times:\n";
+        StringBuilder str = new StringBuilder();
+        str.append("number of jobs: ").append(this.numberOfJobs).append("\n");
+        str.append("processing times:\n");
         for (int processingTime : this.processingTimes) {
-            str += processingTime + " ";
+            str.append(processingTime).append(" ");
         }
-        str += "\n";
-        str += "precedences:\n";
+        str.append("\n");
+        str.append("precedences:\n");
         for (Precedence prec : this.precedences) {
-            str += prec + " ";
+            str.append(prec).append(" ");
         }
-        str += "\n";
-        return str;
+        str.append("\n");
+        return str.toString();
     }
 }
