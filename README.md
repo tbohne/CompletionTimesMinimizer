@@ -1,4 +1,4 @@
-# 1 | prec | sum C_j
+1 | prec | sum C_j
 =====================================================
 
 Exact solution for the 1 | prec | sum C_j scheduling problem using a CPLEX implementation of the following MIP formulation.
